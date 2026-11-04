@@ -1,0 +1,74 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #172033;
+  background: #f3f6fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button, input, select, textarea { font: inherit; }
+
+.pagina {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #09554a, #0e7490);
+}
+
+.cartao {
+  width: min(100%, 620px);
+  padding: 48px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.etiqueta {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #075e54;
+  background: #dff7f1;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  line-height: 1.05;
+}
+
+p {
+  margin: 0 0 28px;
+  color: #536076;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 20px;
+  color: #fff;
+  background: #087f6d;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover { background: #066657; }
+button:focus-visible { outline: 3px solid #79d8c8; outline-offset: 3px; }
+
+@media (max-width: 520px) {
+  .cartao { padding: 32px 24px; }
+}
