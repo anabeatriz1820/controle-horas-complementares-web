@@ -6,7 +6,9 @@
   text-rendering: optimizeLegibility;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -14,7 +16,12 @@ body {
   min-height: 100vh;
 }
 
-button, input, select, textarea { font: inherit; }
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 
 .pagina {
   min-height: 100vh;
@@ -25,50 +32,126 @@ button, input, select, textarea { font: inherit; }
 }
 
 .cartao {
+  width: min(100%, 930px);
+  padding: 70px 72px;
+  border-radius: 36px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.cartao-login {
   width: min(100%, 620px);
   padding: 48px;
-  border-radius: 24px;
-  background: #fff;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
 }
 
 .etiqueta {
   display: inline-block;
-  margin-bottom: 12px;
-  padding: 7px 12px;
+  margin-bottom: 22px;
+  padding: 9px 18px;
   border-radius: 999px;
   color: #075e54;
   background: #dff7f1;
-  font-size: .85rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
 h1 {
-  margin: 0 0 16px;
-  font-size: clamp(2rem, 6vw, 3.4rem);
-  line-height: 1.05;
+  margin: 0 0 28px;
+  max-width: 760px;
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  line-height: 1.02;
+}
+
+.titulo-login {
+  font-size: clamp(2.2rem, 6vw, 3.3rem);
 }
 
 p {
-  margin: 0 0 28px;
+  margin: 0 0 34px;
   color: #536076;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   line-height: 1.7;
 }
 
-button {
-  border: 0;
-  border-radius: 12px;
-  padding: 14px 20px;
-  color: #fff;
-  background: #087f6d;
-  font-weight: 700;
-  cursor: pointer;
+.texto-login {
+  margin-bottom: 24px;
+  font-size: 1rem;
 }
 
-button:hover { background: #066657; }
-button:focus-visible { outline: 3px solid #79d8c8; outline-offset: 3px; }
+.formulario {
+  display: grid;
+  gap: 10px;
+}
 
-@media (max-width: 520px) {
-  .cartao { padding: 32px 24px; }
+.formulario label {
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+.formulario input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  color: #172033;
+  background: #ffffff;
+}
+
+.formulario input:focus {
+  border-color: #087f6d;
+  outline: 3px solid #b9eee5;
+}
+
+.botao-principal,
+.botao-voltar {
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.botao-principal {
+  margin-top: 18px;
+  padding: 16px 30px;
+  color: #ffffff;
+  background: #087f6d;
+}
+
+.botao-principal:hover {
+  background: #066657;
+}
+
+.botao-voltar {
+  display: block;
+  margin: 0 0 24px auto;
+  padding: 8px 12px;
+  color: #075e54;
+  background: #e7f7f4;
+}
+
+button:focus-visible {
+  outline: 3px solid #79d8c8;
+  outline-offset: 3px;
+}
+
+.aviso {
+  margin: 20px 0 0;
+  padding: 12px;
+  border-radius: 10px;
+  color: #526070;
+  background: #f1f5f9;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .cartao,
+  .cartao-login {
+    padding: 36px 26px;
+    border-radius: 24px;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 13vw, 4rem);
+  }
 }
