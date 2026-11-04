@@ -58,7 +58,7 @@ function App() {
     });
 
     if (error) {
-      setMensagem("E-mail ou senha inválidos.");
+      setMensagem(`Erro do Supabase: ${error.message}${error.code ? ` (${error.code})` : ""}`);
       setCarregando(false);
       return;
     }
