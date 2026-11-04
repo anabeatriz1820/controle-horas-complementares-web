@@ -1,3 +1,5 @@
+import React from "react";
+
 function App() {
   return (
     <main className="pagina">
@@ -5,7 +7,7 @@ function App() {
         <span className="etiqueta">FCAP/UPE</span>
         <h1>Atividades Complementares</h1>
         <p>
-          Sistema para envio, acompanhamento e avaliação das atividades
+          Sistema para envio, acompanhamento e avaliacao das atividades
           complementares.
         </p>
         <button type="button">Acessar o sistema</button>
@@ -15,4 +17,3 @@ function App() {
 }
 
 export default App;
-
