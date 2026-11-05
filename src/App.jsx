@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "./lib/supabase.js";
+import LogoUPE from "./LogoUPE.jsx";
 
 const novaSolicitacao = { atividadeId: "", titulo: "", horas: "", comprovante: null };
 const novaAvaliacao = { resultado: "Aprovado", horas: "", justificativa: "" };
@@ -391,6 +392,7 @@ function App() {
 
   return <main className="pagina">
     <section className="cartao">
+      <LogoUPE />
       <span className="etiqueta">FCAP/UPE</span>
       <h1>Atividades Complementares</h1>
       <p>Sistema para envio, acompanhamento e avaliação das atividades complementares.</p>
