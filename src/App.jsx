@@ -19,6 +19,7 @@ function App() {
   const [avaliacao, setAvaliacao] = useState(novaAvaliacao);
   const [parecer, setParecer] = useState("");
   const [observacaoSiga, setObservacaoSiga] = useState("");
+  const [protocoloSiga, setProtocoloSiga] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [carregando, setCarregando] = useState(false);
 
@@ -89,7 +90,7 @@ function App() {
   async function carregarSolicitacoesEquipe() {
     const { data, error } = await supabase
       .from("solicitacoes")
-      .select("id,usuario_id,titulo,horas_solicitadas,horas_aprovadas,comprovante_caminho,comprovante_nome,resultado_avaliacao,situacao_processo,justificativa,registrado_siga,data_solicitacao,parecer_docente,parecer_solicitado,atividades(nome,eixo)")
+      .select("id,usuario_id,titulo,horas_solicitadas,horas_aprovadas,comprovante_caminho,comprovante_nome,resultado_avaliacao,situacao_processo,justificativa,registrado_siga,data_solicitacao,parecer_docente,parecer_solicitado,data_exportacao_siga,protocolo_siga,atividades(nome,eixo)")
       .order("data_solicitacao", { ascending: false });
 
     if (error) {
@@ -103,7 +104,7 @@ function App() {
     if (ids.length > 0) {
       const resposta = await supabase
         .from("usuarios")
-        .select("id,nome,matricula,curso")
+        .select("id,nome,matricula,curso,cpf")
         .in("id", ids);
       alunos = resposta.data ?? [];
     }
@@ -291,6 +292,61 @@ function App() {
     setCarregando(false);
   }
 
+  function escaparCsv(valor) {
+    const texto = String(valor ?? "").replaceAll('"', '""');
+    return `"${texto}"`;
+  }
+
+  async function exportarParaSiga(itens) {
+    if (!itens.length) {
+      setMensagem("Não há solicitações aprovadas aguardando lançamento no SIG@.");
+      return;
+    }
+
+    setCarregando(true);
+    setMensagem("");
+
+    const cabecalho = [
+      "Matrícula", "Nome", "CPF", "Curso", "Atividade", "Eixo", "Título",
+      "Horas solicitadas", "Horas aprovadas", "Resultado", "Justificativa",
+      "Parecer docente", "Data da solicitação", "ID da solicitação"
+    ];
+
+    const linhas = itens.map((item) => [
+      item.aluno?.matricula, item.aluno?.nome, item.aluno?.cpf, item.aluno?.curso,
+      item.atividades?.nome, item.atividades?.eixo, item.titulo,
+      item.horas_solicitadas, item.horas_aprovadas, item.resultado_avaliacao,
+      item.justificativa, item.parecer_docente,
+      new Date(item.data_solicitacao).toLocaleDateString("pt-BR"), item.id
+    ]);
+
+    const csv = [cabecalho, ...linhas]
+      .map((linha) => linha.map(escaparCsv).join(";"))
+      .join("\r\n");
+
+    const arquivo = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `atividades-aprovadas-siga-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    const { error } = await supabase.rpc("registrar_exportacao_siga", {
+      p_solicitacao_ids: itens.map((item) => item.id),
+    });
+
+    if (error) setMensagem(`O CSV foi baixado, mas não foi possível registrar a exportação: ${error.message}`);
+    else {
+      setMensagem(`${itens.length} solicitação(ões) exportada(s) para lançamento no SIG@.`);
+      await carregarSolicitacoesEquipe();
+    }
+
+    setCarregando(false);
+  }
+
   async function confirmarSiga(evento) {
     evento.preventDefault();
     if (!selecionada) return;
@@ -299,6 +355,7 @@ function App() {
     const { error } = await supabase.rpc("confirmar_registro_siga", {
       p_solicitacao_id: selecionada.id,
       p_observacao: observacaoSiga.trim() || null,
+      p_protocolo: protocoloSiga.trim() || null,
     });
 
     if (error) setMensagem(`Não foi possível confirmar o SIG@: ${error.message}`);
@@ -306,6 +363,7 @@ function App() {
       setMensagem("Registro no SIG@ confirmado. Processo concluído.");
       setSelecionada(null);
       setObservacaoSiga("");
+      setProtocoloSiga("");
       await carregarSolicitacoesEquipe();
     }
 
@@ -353,6 +411,9 @@ function App() {
       observacaoSiga={observacaoSiga}
       setObservacaoSiga={setObservacaoSiga}
       confirmarSiga={confirmarSiga}
+      protocoloSiga={protocoloSiga}
+      setProtocoloSiga={setProtocoloSiga}
+      exportarParaSiga={exportarParaSiga}
       carregando={carregando}
     />;
   }
@@ -483,10 +544,18 @@ function PainelTecnico(props) {
       </section>
 
       <section className="lista">
-        <h2>Aguardando lançamento no SIG@ ({aguardandoSiga.length})</h2>
+        <div className="cabecalho-painel">
+          <div>
+            <h2>Aguardando lançamento no SIG@ ({aguardandoSiga.length})</h2>
+            <p>Exporte a planilha, faça o lançamento no SIG@UPE e confirme cada processo.</p>
+          </div>
+          <button className="botao-principal" type="button" disabled={!aguardandoSiga.length || props.carregando} onClick={() => props.exportarParaSiga(aguardandoSiga)}>
+            {props.carregando ? "Preparando..." : "Exportar aprovadas para SIG@"}
+          </button>
+        </div>
         {aguardandoSiga.length === 0 ? <p className="vazio">Nenhum processo aguardando lançamento.</p> : aguardandoSiga.map((item) => <CartaoEquipe key={item.id} item={item}>
           <button className="botao-secundario" type="button" onClick={() => props.visualizarPDF(item)}>Visualizar PDF</button>
-          <button className="botao-principal" type="button" onClick={() => { props.setSelecionada({ ...item, modo: "siga" }); props.setObservacaoSiga(""); }}>Confirmar SIG@</button>
+          <button className="botao-principal" type="button" onClick={() => { props.setSelecionada({ ...item, modo: "siga" }); props.setObservacaoSiga(""); props.setProtocoloSiga(""); }}>Confirmar SIG@</button>
         </CartaoEquipe>)}
       </section>
 
@@ -509,6 +578,9 @@ function PainelTecnico(props) {
       {props.selecionada?.modo === "siga" && <Modal fechar={() => props.setSelecionada(null)} titulo="Confirmar registro no SIG@">
         <p><strong>{props.selecionada.aluno?.nome}</strong> · {props.selecionada.horas_aprovadas}h aprovadas</p>
         <form className="formulario" onSubmit={props.confirmarSiga}>
+          <label>Protocolo SIG@
+            <input value={props.protocoloSiga} onChange={(e) => props.setProtocoloSiga(e.target.value)} placeholder="Ex.: SIGA-2026-000123" />
+          </label>
           <label>Observação do técnico<textarea rows="4" value={props.observacaoSiga} onChange={(e) => props.setObservacaoSiga(e.target.value)} placeholder="Opcional" /></label>
           <button className="botao-principal" disabled={props.carregando}>{props.carregando ? "Confirmando..." : "Confirmar lançamento"}</button>
         </form>
